@@ -46,4 +46,12 @@ A SLURM array script to rotate, preprocess, train, and export NeRF models from v
 * `pcd/<basename>_colmap_pcd/pointcloud/` – .ply point clouds
 * `pcd/<basename>_colmap_pcd/poisson/` – .ply meshes
 
-*Adjust paths and test with `--array=0-0` before full run.*
+## Adjust Parameters
+
+ffmpeg rotation: -sseof -20 (last seconds), transpose=1 (orientation)
+
+Frame count: --num-frames-target 70
+
+Array range: #SBATCH --array=0-M or N-N
+
+Adjust values as needed for your test or full run.

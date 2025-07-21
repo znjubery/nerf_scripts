@@ -25,6 +25,21 @@ A SLURM array script to rotate, preprocess, train, and export NeRF models from v
    * `logs/array_train_<JOBID>_<TASKID>.out` (stdout)
    * `logs/array_train_<JOBID>_<TASKID>.err` (stderr)
 
+## Script Overview
+
+`run_nerfstudio_array.sh` automates per-video processing via a SLURM array:
+
+* **SLURM Directives**: Job name, GPU (A100), CPUs (16), memory (100G), time (`00:50:00`), array indices, and log paths.
+* **Environment**: Loads `cuda` module and activates the Nerfstudio Conda environment.
+* **Video Selection**: Reads the video path from `video_list.txt` using `$SLURM_ARRAY_TASK_ID`.
+* **Rotation**: Uses `ffmpeg` to rotate the last 20 seconds of the clip.
+* **Preprocess (COLMAP)**: Runs `ns-process-data` to extract \~70 frames.
+* **Training (Nerfacto)**: Executes `ns-train nerfacto` for 30,000 iterations with `viewer+wandb`.
+* **Export**:
+
+  * **Point Cloud**: `ns-export pointcloud` → `pcd/<basename>_colmap_pcd/pointcloud/`
+  * **Poisson Mesh**: `ns-export poisson` → `pcd/<basename>_colmap_pcd/poisson/`
+
 ## Output Structure
 
 * `processed/<basename>_colmap/` – COLMAP data

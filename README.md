@@ -47,7 +47,7 @@ A SLURM array script to rotate, preprocess, train, and export NeRF models from v
 * `pcd/<basename>_colmap_pcd/poisson/` – .ply meshes
 
 ## Adjust Parameters  
-As needed for your case.
+As needed for your case.  
 ffmpeg rotation: -sseof -20 (last seconds), transpose=1 (orientation)
 
 Frame count: --num-frames-target 70

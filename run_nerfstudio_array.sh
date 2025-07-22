@@ -6,7 +6,6 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=100G
 #SBATCH --partition=nova
-#SBATCH --reservation=baskar-202504
 #SBATCH --account=baskarg-lab
 #SBATCH --time=00:50:00
 #SBATCH --array=0-999

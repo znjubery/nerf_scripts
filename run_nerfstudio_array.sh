@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=100G
 #SBATCH --partition=nova
-#SBATCH --account=baskarg-lab
+#SBATCH --account=mech-ai
 #SBATCH --time=00:50:00
 #SBATCH --array=0-999
 #SBATCH --output=logs/array_train_%A_%a.out

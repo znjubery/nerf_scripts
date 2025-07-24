@@ -1,7 +1,3 @@
-Thanks! Based on your reorganized folder structure, here’s the updated `README.md` that reflects the changes:
-
----
-
 # Nerfstudio Batch Processing Array
 
 SLURM-based scripts for automating NeRF training and pose inspection workflows using Nerfstudio.

@@ -72,8 +72,6 @@ Adjust values as needed for your test or full run.
 * Frame extraction: `--num-frames-target 70`
 * SLURM array range: `#SBATCH --array=0-N`
 
-## 🔍 Additional Utilities
-
 ## 🔍 Pose Estimation Checking
 
 Folder: `pose_estimation_checking/`

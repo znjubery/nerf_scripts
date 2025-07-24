@@ -1,57 +1,125 @@
+Thanks! Based on your reorganized folder structure, here’s the updated `README.md` that reflects the changes:
+
+---
+
 # Nerfstudio Batch Processing Array
 
-A SLURM array script to rotate, preprocess, train, and export NeRF models from videos.
+SLURM-based scripts for automating NeRF training and pose inspection workflows using Nerfstudio.
 
-## Quick Start
+## 🔧 Folder Structure
+
+```
+nerf_scripts/
+├── end2end_nerf_reconstruction/
+│   ├── run_nerfstudio_array.sh
+│   └── job_array_train_preset_intrinsics.sh
+│   └── video_list.txt
+├── pose_estimation_checking/
+│   ├── camera_pose_display_used_in_bash.py
+│   ├── job_array_pose_estimation.sh
+│   └── video_list.txt
+```
+
+---
+
+## 🚀 Quick Start: End-to-End NeRF Reconstruction
 
 1. **List videos**
 
    ```bash
-   find /path/to/videos -type f \( -iname "*.mp4" -o -iname "*.mov" -o -iname "*.avi" -o -iname "*.mkv" \) > video_list.txt
+   find /path/to/videos -type f \( -iname "*.mp4" -o -iname "*.mov" -o -iname "*.avi" -o -iname "*.mkv" \) > end2end_nerf_reconstruction/video_list.txt
    ```
-2. **Script**
 
-   * Name: `run_nerfstudio_array.sh`
-   * Ensure `video_list.txt`, `logs/`, `processed/`, and `pcd/` exist.
-   * Adjust SLURM directives (array range, partitions, account).
-3. **Submit**
+2. **Run SLURM job**
 
    ```bash
+   cd end2end_nerf_reconstruction
    chmod +x run_nerfstudio_array.sh
    sbatch run_nerfstudio_array.sh
    ```
-4. **Logs**
 
-   * `logs/array_train_<JOBID>_<TASKID>.out` (stdout)
-   * `logs/array_train_<JOBID>_<TASKID>.err` (stderr)
+3. **Output Logs**
 
-## Script Overview
+   * `logs/array_train_<JOBID>_<TASKID>.out` – stdout
+   * `logs/array_train_<JOBID>_<TASKID>.err` – stderr
 
-`run_nerfstudio_array.sh` automates per-video processing via a SLURM array:
+---
 
-* **SLURM Directives**: Job name, GPU (A100), CPUs (16), memory (100G), time (`00:50:00`), array indices, and log paths.
-* **Environment**: Loads `cuda` module and activates the Nerfstudio Conda environment.
-* **Video Selection**: Reads the video path from `video_list.txt` using `$SLURM_ARRAY_TASK_ID`.
-* **Rotation**: Uses `ffmpeg` to rotate the last 20 seconds of the clip.
-* **Preprocess (COLMAP)**: Runs `ns-process-data` to extract \~70 frames.
-* **Training (Nerfacto)**: Executes `ns-train nerfacto` for 30,000 iterations with `viewer+wandb`.
+## 🧠 What It Does
+
+### `run_nerfstudio_array.sh` (in `end2end_nerf_reconstruction/`)
+
+Automates per-video processing via a SLURM array:
+
+* **Environment Setup**: Loads CUDA and activates Nerfstudio conda env
+* **Video Selection**: Indexes `video_list.txt` using `$SLURM_ARRAY_TASK_ID`
+* **Rotation**: Uses `ffmpeg` to rotate last 20s of each clip
+* **Preprocessing**: Runs `ns-process-data` to extract frames (\~70)
+* **Training**: Uses `ns-train nerfacto` with 30,000 iters
 * **Export**:
 
-  * **Point Cloud**: `ns-export pointcloud` → `pcd/<basename>_colmap_pcd/pointcloud/`
-  * **Poisson Mesh**: `ns-export poisson` → `pcd/<basename>_colmap_pcd/poisson/`
+  * `ns-export pointcloud` → `pcd/<basename>_colmap_pcd/pointcloud/`
+  * `ns-export poisson` → `pcd/<basename>_colmap_pcd/poisson/`
 
-## Output Structure
+---
 
-* `processed/<basename>_colmap/` – COLMAP data
-* `pcd/<basename>_colmap_pcd/pointcloud/` – .ply point clouds
-* `pcd/<basename>_colmap_pcd/poisson/` – .ply meshes
+## 📁 Output Structure
 
-## Adjust Parameters  
-As needed for your case.  
-ffmpeg rotation: -sseof -20 (last seconds), transpose=1 (orientation)
+* `processed/<basename>_colmap/` – COLMAP outputs
+* `pcd/<basename>_colmap_pcd/pointcloud/` – point clouds (.ply)
+* `pcd/<basename>_colmap_pcd/poisson/` – meshes (.ply)
 
-Frame count: --num-frames-target 70
+---
+## ⚙️ Parameters to Tune
+Adjust values as needed for your test or full run.  
+* `ffmpeg` rotation: `-sseof -20` (last 20s), `transpose=1` (orientation) 
+* Frame extraction: `--num-frames-target 70`
+* SLURM array range: `#SBATCH --array=0-N`
 
-Array range: #SBATCH --array=0-M or N-N
+## 🔍 Additional Utilities
 
-Adjust values as needed for your test or full run.
+## 🔍 Pose Estimation Checking
+
+Folder: `pose_estimation_checking/`
+
+Tools to inspect and compare COLMAP camera pose estimation results using different settings.
+
+### 📂 Contents
+
+* `camera_pose_display_used_in_bash.py` – Visualizes or parses COLMAP pose outputs (can be used in scripts or interactively).
+* `job_array_pose_estimation.sh` – SLURM array script for processing multiple videos with various COLMAP settings.
+* `video_list.txt` – List of input video paths (generated manually).
+
+### 🚀 Quick Start
+
+1. **List videos**
+
+   ```bash
+   find /path/to/videos -type f \( -iname "*.mp4" -o -iname "*.mov" -o -iname "*.avi" -o -iname "*.mkv" \) > pose_estimation_checking/video_list.txt
+   ```
+
+2. **Run SLURM Job**
+
+   ```bash
+   cd pose_estimation_checking
+   chmod +x job_array_pose_estimation.sh
+   sbatch job_array_pose_estimation.sh
+   ```
+
+### 🧠 What It Does
+
+The script:
+
+* Selects videos from `video_list.txt` using `$SLURM_ARRAY_TASK_ID`
+* Runs `ns-process-data` on each video using different COLMAP settings (e.g., with/without `--use-colmap-default-intrinsics`, etc.)
+* Logs the COLMAP console output
+* Extracts estimated camera poses (extrinsics) to a dedicated folder
+* Visualizes the camera trajectories using `camera_pose_display_used_in_bash.py`
+
+### 📌 Goal
+
+To **compare different COLMAP settings** on your video dataset:
+
+* Evaluate which settings produce the most accurate and stable camera poses
+* Use visualizations and logs to guide selection of settings for NeRF training
+
